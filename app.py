@@ -6,7 +6,7 @@ import numpy as np
 app = Flask(__name__)
 
 # Load the model
-model = joblib.load('HCD.pkl')  # Replace with your actual model file path
+model = joblib.load('HCD_model.pkl')  # Replace with your actual model file path
 
 @app.route('/predict', methods=['POST'])
 def predict():
