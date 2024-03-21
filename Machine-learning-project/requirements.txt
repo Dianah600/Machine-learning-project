@@ -1,0 +1,13 @@
+mlflow
+dvc
+pandas
+scikit-learn
+flask
+numpy
+requests
+tf.keras==2.15.0
+mlflow==2.11.2
+cloudpickle==2.2.1
+seaborn
+pyngrok
+tensorflow==2.15.0
