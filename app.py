@@ -1,46 +1,48 @@
-#Include the required libraries
-from flask import Flask, request, jsonify
-import joblib
+from flask import Flask, render_template, request
 import numpy as np
+from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
 
-# Load the model
-model = joblib.load('HCD_model.pkl')  # Replace with your actual model file path
+# Load your machine learning model
+model = load_model('HCD_model.h5')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        # Assuming JSON input, make sure to replace 'feature1', 'feature2', etc., with your actual feature names
-        data = request.json
-        features = [
-            data['age'],
-            data['sex'],
-            data['chest pain type'],
-            data['resting bp s'],
-            data['cholesterol'],
-            data['fasting blood sugar'],
-            data['resting ecg'],
-            data['max heart rate'],
-            data['exercise angina'],
-            data['oldpeak'],
-            data['ST slope'],
-            data['target']
-        ]
+    # Get input values from the form
+    age = float(request.form['age'])
+    sex = float(request.form['sex'])
+    chest_pain_type = float(request.form['chest_pain_type'])
+    resting_bp_s = float(request.form['resting_bp_s'])
+    cholesterol = float(request.form['cholesterol'])
+    fasting_blood_sugar = float(request.form['fasting_blood_sugar'])
+    resting_ecg = float(request.form['resting_ecg'])
+    max_heart_rate = float(request.form['max_heart_rate'])
+    exercise_angina = float(request.form['exercise_angina'])
+    oldpeak = float(request.form['oldpeak'])
+    ST_slope = float(request.form['ST_slope'])
 
-        # Convert features to float (if needed)
-        features = [float(feature) for feature in features]
+    # Create input array (including target)
+    input_data = np.array([[age, sex, chest_pain_type, resting_bp_s, cholesterol, 
+                            fasting_blood_sugar, resting_ecg, max_heart_rate,
+                            exercise_angina, oldpeak, ST_slope]])
 
-        # Make a prediction
-        prediction = model.predict([features])[0]
+    # Make prediction
+    prediction = model.predict(input_data)
 
-        # Convert NumPy array to a standard Python list
-        prediction = prediction.tolist() if isinstance(prediction, np.ndarray) else prediction
+    # Format prediction (assuming binary classification)
+    if prediction > 0.5:
+        result = 'Positive'
+    else:
+        result = 'Negative'
 
-        return jsonify({'prediction': prediction})
+    # Pass the result back to the same HTML page
+    return render_template('index.html', prediction_result=result)
 
-    except Exception as e:
-        return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(debug=True)
